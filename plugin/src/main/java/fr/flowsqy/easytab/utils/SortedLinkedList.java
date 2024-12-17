@@ -10,12 +10,14 @@ import org.jetbrains.annotations.Nullable;
 
 public class SortedLinkedList<T> {
 
+    private final long maxValue;
     private Node first;
     private int size;
     private final Comparator<T> comparator;
 
-    public SortedLinkedList(@NotNull Comparator<T> comparator) {
+    public SortedLinkedList(@NotNull Comparator<T> comparator, long maxValue) {
         this.comparator = comparator;
+        this.maxValue = maxValue;
         size = 0;
         first = null;
     }
@@ -25,7 +27,7 @@ public class SortedLinkedList<T> {
         size++;
         // Each position are calculated with two divisions to avoid buffer overflow
         if (first == null) {
-            final long newPosition = Long.MAX_VALUE >>> 2;
+            final long newPosition = maxValue >>> 2;
             first = new Node(newPosition, element);
             return Collections.singletonList(new Update<>(-1, newPosition, element));
         }
@@ -55,7 +57,7 @@ public class SortedLinkedList<T> {
             }
             return Collections.singletonList(new Update<>(-1, newPosition, element));
         }
-        final long newPosition = Long.MAX_VALUE >>> 2 + currentNode.position >>> 2;
+        final long newPosition = maxValue >>> 2 + currentNode.position >>> 2;
         final Node newNode = new Node(newPosition, element);
         currentNode.next = newNode;
         if (newPosition == currentNode.position) {
@@ -67,7 +69,7 @@ public class SortedLinkedList<T> {
     @NotNull
     private List<Update<T>> recalculatePositions() {
         final List<Update<T>> updates = new LinkedList<>();
-        final long space = Long.MAX_VALUE / (size + 1);
+        final long space = maxValue / (size + 1);
         long position = space;
         Node node = first;
         while (node != null) {
