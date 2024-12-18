@@ -2,13 +2,14 @@ package fr.flowsqy.easytab.utils;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class SortedLinkedList<T> {
+public class SortedLinkedList<T> implements Iterable<T> {
 
     private final long maxValue;
     private Node first;
@@ -27,12 +28,12 @@ public class SortedLinkedList<T> {
         size++;
         // Each position are calculated with two divisions to avoid buffer overflow
         if (first == null) {
-            final long newPosition = maxValue >>> 2;
+            final long newPosition = maxValue >>> 1;
             first = new Node(newPosition, element);
             return Collections.singletonList(new Update<>(-1, newPosition, element));
         }
         if (comparator.compare(element, first.value) < 0) {
-            final long newPosition = first.position >>> 2;
+            final long newPosition = first.position >>> 1;
             final Node newNode = new Node(newPosition, element);
             newNode.next = first;
             first = newNode;
@@ -43,12 +44,12 @@ public class SortedLinkedList<T> {
         }
         var currentNode = first;
         while (currentNode.next != null) {
-            final int comp = comparator.compare(element, currentNode.value);
+            final int comp = comparator.compare(element, currentNode.next.value);
             if (comp > 0) {
                 currentNode = currentNode.next;
                 continue;
             }
-            final long newPosition = currentNode.position >>> 2 + currentNode.next.position >>> 2;
+            final long newPosition = (currentNode.position >>> 1) + (currentNode.next.position >>> 1);
             final Node newNode = new Node(newPosition, element);
             newNode.next = currentNode.next;
             currentNode.next = newNode;
@@ -57,7 +58,7 @@ public class SortedLinkedList<T> {
             }
             return Collections.singletonList(new Update<>(-1, newPosition, element));
         }
-        final long newPosition = maxValue >>> 2 + currentNode.position >>> 2;
+        final long newPosition = (maxValue >>> 1) + (currentNode.position >>> 1);
         final Node newNode = new Node(newPosition, element);
         currentNode.next = newNode;
         if (newPosition == currentNode.position) {
@@ -82,16 +83,13 @@ public class SortedLinkedList<T> {
     }
 
     @Nullable
-    public Update<T> remove(T element) {
+    public Update<T> remove(@NotNull T element) {
         if (first == null) {
             return null;
         }
-        if (first.next == null) {
-            if (!first.value.equals(element)) {
-                return null;
-            }
+        if (first.value.equals(element)) {
             final Update<T> update = new Update<>(first.position, -1, first.value);
-            first = null;
+            first = first.next;
             size--;
             return update;
         }
@@ -103,7 +101,6 @@ public class SortedLinkedList<T> {
         if (next == null) {
             return null;
         }
-
         final Update<T> update = new Update<>(next.position, -1, next.value);
         currentNode.next = next.next;
         size--;
@@ -122,6 +119,29 @@ public class SortedLinkedList<T> {
         public Node(long position, @NotNull T value) {
             this.position = position;
             this.value = value;
+        }
+
+    }
+
+    @Override
+    public Iterator<T> iterator() {
+        return new Iter();
+    }
+
+    private class Iter implements Iterator<T> {
+
+        private Node next = first;
+
+        @Override
+        public boolean hasNext() {
+            return next != null;
+        }
+
+        @Override
+        public T next() {
+            final var node = next;
+            next = next.next;
+            return node.value;
         }
 
     }
