@@ -3,3 +3,4 @@ author: "Flowsqy"
 version: "${version}"
 main: "fr.flowsqy.easytab.EasyTabPlugin"
 api-version: "1.13"
+depend: [LuckPerms]

@@ -16,6 +16,7 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     implementation("org.jetbrains:annotations:24.0.1")
     compileOnly("org.spigotmc:spigot-api:1.21.4-R0.1-SNAPSHOT")
+    compileOnly("net.luckperms:api:5.4")
 }
 
 java {

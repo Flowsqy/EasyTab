@@ -8,6 +8,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import fr.flowsqy.easytab.config.Config;
 import fr.flowsqy.easytab.config.ConfigLoader;
 import fr.flowsqy.easytab.group.GroupData;
+import fr.flowsqy.easytab.permission.PermissionLoader;
 
 public class EasyTabPlugin extends JavaPlugin {
 
@@ -21,9 +22,9 @@ public class EasyTabPlugin extends JavaPlugin {
             logger.warning("Can't write in the plugin directory. Disable the plugin");
             return;
         }
-        final Config config = new Config();
+        final var config = new Config();
         config.load(configLoader, this, "config.yml");
-        final Map<String, GroupData> groupDatas = config.loadGroupDatas(logger);
+        final var groupDatas = config.loadGroupDatas(logger); 
     }
 
 }
