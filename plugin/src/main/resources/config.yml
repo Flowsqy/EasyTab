@@ -1,0 +1,33 @@
+# Define groups
+# Each group is defined as specified below
+#
+#<group-name>:
+#  priority: <priority>
+#  color: <color>
+#  prefix: <prefix>
+#  suffix: <suffix>
+#
+# Where:
+# <group-name> is the name of the group as specified in luckperms
+# <priority> is an integer specifying the order in the tablist. The greater will be at the top.
+# <color> is the color of the name above the player head. Must be one from the default minecraft colors.
+# <prefix> is the prefix for the name above the player head
+# <suffix> is the suffix for the name above the player head
+# 
+# For example:
+#
+#admin:
+#  priority: 10
+#  color: red
+#  prefix: "&c[Admin]"
+#
+#helper:
+#  priority: 5
+#  color: green
+#  suffix: "&a[H]"
+#
+#player:
+#  priority: 0
+#  color: yellow
+#
+
