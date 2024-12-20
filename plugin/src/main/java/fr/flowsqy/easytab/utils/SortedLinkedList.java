@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Predicate;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -83,18 +84,18 @@ public class SortedLinkedList<T> implements Iterable<T> {
     }
 
     @Nullable
-    public Update<T> remove(@NotNull T element) {
+    public Update<T> removeFirst(@NotNull Predicate<T> predicate) {
         if (first == null) {
             return null;
         }
-        if (first.value.equals(element)) {
+        if (predicate.test(first.value)) {
             final Update<T> update = new Update<>(first.position, -1, first.value);
             first = first.next;
             size--;
             return update;
         }
         Node currentNode = first;
-        while (currentNode.next != null && !currentNode.next.value.equals(element)) {
+        while (currentNode.next != null && !predicate.test(currentNode.next.value)) {
             currentNode = currentNode.next;
         }
         final var next = currentNode.next;
