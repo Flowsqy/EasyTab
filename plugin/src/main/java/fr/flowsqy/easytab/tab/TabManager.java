@@ -66,4 +66,13 @@ public class TabManager {
         }
     }
 
+    public void remove(@NotNull PlayerProfile playerProfile) {
+        lock.lock();
+        try {
+            list.removeFirst(ps -> ps.profile().equals(playerProfile));
+        } finally {
+            lock.unlock();
+        }
+    }
+
 }
