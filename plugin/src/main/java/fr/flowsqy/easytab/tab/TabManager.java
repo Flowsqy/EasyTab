@@ -1,10 +1,10 @@
 package fr.flowsqy.easytab.tab;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import fr.flowsqy.easytab.group.GroupData;
@@ -54,10 +54,13 @@ public class TabManager {
         }
     }
 
-    public void add(@NotNull Player player, @NotNull GroupData[] groups) {
+    public void add(@NotNull PlayerProfile playerProfile, @NotNull GroupData[] groups) {
         lock.lock();
         try {
-            // Handle adding
+            final var copiedGroups = new GroupData[groups.length];
+            System.arraycopy(groups, 0, copiedGroups, 0, groups.length);
+            Arrays.sort(copiedGroups, Comparator.comparingInt(GroupData::priority));
+            list.add(new PlayerSnapshot(playerProfile, copiedGroups));
         } finally {
             lock.unlock();
         }
