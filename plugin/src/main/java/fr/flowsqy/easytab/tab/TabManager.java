@@ -21,9 +21,6 @@ public class TabManager {
     private final SortedLinkedList<PlayerSnapshot> list;
     private final NameTranslator nameTranslator;
 
-    private record PlayerSnapshot(@NotNull PlayerProfile profile, @NotNull GroupData[] groups) {
-    }
-
     public TabManager() {
         lock = new ReentrantLock();
         nameTranslator = new NameTranslator(10, Comparator.comparing(String::valueOf, (s1, s2) -> s1.compareTo(s2)));
@@ -81,7 +78,7 @@ public class TabManager {
                 final var previousName = update.previousPosition() < 0 ? null
                         : nameTranslator.translate(update.previousPosition());
                 final var newName = nameTranslator.translate(update.newPosition());
-                final var teamUpdate = new TeamUpdate(previousName, newName, update.value().profile());
+                final var teamUpdate = new TeamUpdate(previousName, newName, update.value());
                 teamUpdates.add(teamUpdate);
             }
             return teamUpdates;
@@ -99,7 +96,7 @@ public class TabManager {
                 return null;
             }
             final var previousName = nameTranslator.translate(update.previousPosition());
-            return new TeamUpdate(previousName, null, playerProfile);
+            return new TeamUpdate(previousName, null, update.value());
         } finally {
             lock.unlock();
         }
@@ -121,7 +118,7 @@ public class TabManager {
                         : update.previousPosition();
                 final var previousName = nameTranslator.translate(previousPosition);
                 final var newName = nameTranslator.translate(update.newPosition());
-                final var teamUpdate = new TeamUpdate(previousName, newName, update.value().profile());
+                final var teamUpdate = new TeamUpdate(previousName, newName, update.value());
                 teamUpdates.add(teamUpdate);
             }
             return teamUpdates;
