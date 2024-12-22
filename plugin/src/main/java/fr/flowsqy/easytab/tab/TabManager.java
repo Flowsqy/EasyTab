@@ -2,6 +2,7 @@ package fr.flowsqy.easytab.tab;
 
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -74,7 +75,16 @@ public class TabManager {
     public List<TeamUpdate> add(@NotNull PlayerProfile playerProfile, @NotNull GroupData[] groups) {
         lock.lock();
         try {
-            unsafeAdd(playerProfile, groups);
+            final var updates = unsafeAdd(playerProfile, groups);
+            final var teamUpdates = new LinkedList<TeamUpdate>();
+            for (var update : updates) {
+                final var previousName = update.previousPosition() < 0 ? null
+                        : nameTranslator.translate(update.previousPosition());
+                final var newName = nameTranslator.translate(update.newPosition());
+                final var teamUpdate = new TeamUpdate(previousName, newName, update.value().profile());
+                teamUpdates.add(teamUpdate);
+            }
+            return teamUpdates;
         } finally {
             lock.unlock();
         }
@@ -84,7 +94,12 @@ public class TabManager {
     public TeamUpdate remove(@NotNull PlayerProfile playerProfile) {
         lock.lock();
         try {
-            unsafeRemove(playerProfile);
+            final var update = unsafeRemove(playerProfile);
+            if (update == null) {
+                return null;
+            }
+            final var previousName = nameTranslator.translate(update.previousPosition());
+            return new TeamUpdate(previousName, null, playerProfile);
         } finally {
             lock.unlock();
         }
@@ -94,8 +109,22 @@ public class TabManager {
     public List<TeamUpdate> actualize(@NotNull PlayerProfile playerProfile, @NotNull GroupData[] groups) {
         lock.lock();
         try {
-            unsafeRemove(playerProfile);
-            unsafeAdd(playerProfile, groups);
+            final var removeUpdate = unsafeRemove(playerProfile);
+            if (removeUpdate == null) {
+                return add(playerProfile, groups);
+            }
+            final var updates = unsafeAdd(playerProfile, groups);
+            final var teamUpdates = new LinkedList<TeamUpdate>();
+            for (var update : updates) {
+                final var previousPosition = update.value().profile().equals(playerProfile)
+                        ? removeUpdate.previousPosition()
+                        : update.previousPosition();
+                final var previousName = nameTranslator.translate(previousPosition);
+                final var newName = nameTranslator.translate(update.newPosition());
+                final var teamUpdate = new TeamUpdate(previousName, newName, update.value().profile());
+                teamUpdates.add(teamUpdate);
+            }
+            return teamUpdates;
         } finally {
             lock.unlock();
         }
