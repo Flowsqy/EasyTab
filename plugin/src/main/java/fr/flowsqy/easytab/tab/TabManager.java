@@ -2,14 +2,17 @@ package fr.flowsqy.easytab.tab;
 
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import fr.flowsqy.easytab.group.GroupData;
 import fr.flowsqy.easytab.utils.NameTranslator;
 import fr.flowsqy.easytab.utils.SortedLinkedList;
+import fr.flowsqy.easytab.utils.SortedLinkedList.Update;
 
 public class TabManager {
 
@@ -54,22 +57,45 @@ public class TabManager {
         }
     }
 
-    public void add(@NotNull PlayerProfile playerProfile, @NotNull GroupData[] groups) {
+    @NotNull
+    private List<Update<PlayerSnapshot>> unsafeAdd(@NotNull PlayerProfile playerProfile, @NotNull GroupData[] groups) {
+        final var copiedGroups = new GroupData[groups.length];
+        System.arraycopy(groups, 0, copiedGroups, 0, groups.length);
+        Arrays.sort(copiedGroups, Comparator.comparingInt(GroupData::priority));
+        return list.add(new PlayerSnapshot(playerProfile, copiedGroups));
+    }
+
+    @Nullable
+    private Update<PlayerSnapshot> unsafeRemove(@NotNull PlayerProfile playerProfile) {
+        return list.removeFirst(ps -> ps.profile().equals(playerProfile));
+    }
+
+    @NotNull
+    public List<TeamUpdate> add(@NotNull PlayerProfile playerProfile, @NotNull GroupData[] groups) {
         lock.lock();
         try {
-            final var copiedGroups = new GroupData[groups.length];
-            System.arraycopy(groups, 0, copiedGroups, 0, groups.length);
-            Arrays.sort(copiedGroups, Comparator.comparingInt(GroupData::priority));
-            list.add(new PlayerSnapshot(playerProfile, copiedGroups));
+            unsafeAdd(playerProfile, groups);
         } finally {
             lock.unlock();
         }
     }
 
-    public void remove(@NotNull PlayerProfile playerProfile) {
+    @Nullable
+    public TeamUpdate remove(@NotNull PlayerProfile playerProfile) {
         lock.lock();
         try {
-            list.removeFirst(ps -> ps.profile().equals(playerProfile));
+            unsafeRemove(playerProfile);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @NotNull
+    public List<TeamUpdate> actualize(@NotNull PlayerProfile playerProfile, @NotNull GroupData[] groups) {
+        lock.lock();
+        try {
+            unsafeRemove(playerProfile);
+            unsafeAdd(playerProfile, groups);
         } finally {
             lock.unlock();
         }
