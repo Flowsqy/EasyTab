@@ -39,7 +39,7 @@ public class SortedLinkedList<T> implements Iterable<T> {
             newNode.next = first;
             first = newNode;
             if (newPosition == 0) {
-                return recalculatePositions();
+                return recalculatePositions(newNode);
             }
             return Collections.singletonList(new Update<>(-1, newPosition, element));
         }
@@ -55,7 +55,7 @@ public class SortedLinkedList<T> implements Iterable<T> {
             newNode.next = currentNode.next;
             currentNode.next = newNode;
             if (newPosition == currentNode.position) {
-                return recalculatePositions();
+                return recalculatePositions(newNode);
             }
             return Collections.singletonList(new Update<>(-1, newPosition, element));
         }
@@ -63,19 +63,19 @@ public class SortedLinkedList<T> implements Iterable<T> {
         final Node newNode = new Node(newPosition, element);
         currentNode.next = newNode;
         if (newPosition == currentNode.position) {
-            return recalculatePositions();
+            return recalculatePositions(newNode);
         }
         return Collections.singletonList(new Update<>(-1, newPosition, element));
     }
 
     @NotNull
-    private List<Update<T>> recalculatePositions() {
+    private List<Update<T>> recalculatePositions(@NotNull Node newNode) {
         final List<Update<T>> updates = new LinkedList<>();
         final long space = maxValue / (size + 1);
         long position = space;
         Node node = first;
         while (node != null) {
-            updates.add(new Update<>(node.position, position, node.value));
+            updates.add(new Update<>(node == newNode ? -1 : node.position, position, node.value));
             node.position = position;
             position += space;
             node = node.next;
