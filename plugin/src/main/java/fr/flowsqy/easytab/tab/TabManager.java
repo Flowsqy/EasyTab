@@ -59,7 +59,7 @@ public class TabManager {
     private List<Update<PlayerSnapshot>> unsafeAdd(@NotNull PlayerProfile playerProfile, @NotNull GroupData[] groups) {
         final var copiedGroups = new GroupData[groups.length];
         System.arraycopy(groups, 0, copiedGroups, 0, groups.length);
-        Arrays.sort(copiedGroups, Comparator.comparingInt(GroupData::priority));
+        Arrays.sort(copiedGroups, Comparator.comparingInt(GroupData::priority).reversed());
         return list.add(new PlayerSnapshot(playerProfile, copiedGroups));
     }
 
