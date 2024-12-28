@@ -108,6 +108,21 @@ public class SortedLinkedList<T> implements Iterable<T> {
         return update;
     }
 
+    @NotNull
+    public List<Update<T>> clear() {
+        if (first == null) {
+            return Collections.emptyList();
+        }
+        final var updates = new LinkedList<Update<T>>();
+        var node = first;
+        while (node != null) {
+            updates.add(new Update<>(node.position, -1, node.value));
+            node = node.next;
+        }
+        first = null;
+        return updates;
+    }
+
     public record Update<T>(long previousPosition, long newPosition, T value) {
     }
 

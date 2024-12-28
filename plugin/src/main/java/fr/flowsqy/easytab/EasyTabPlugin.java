@@ -12,6 +12,14 @@ import fr.flowsqy.easytab.tab.TabManager;
 
 public class EasyTabPlugin extends JavaPlugin {
 
+    private final TabManager tabManager;
+    private final ScoreboardManager scoreboardManager;
+
+    public EasyTabPlugin() {
+        tabManager = new TabManager();
+        scoreboardManager = new ScoreboardManager();
+    }
+
     @Override
     public void onEnable() {
         final var configLoader = new ConfigLoader();
@@ -27,9 +35,14 @@ public class EasyTabPlugin extends JavaPlugin {
         final var groupDatas = config.loadGroupDatas(logger);
         final var permissionLoader = new PermissionLoader();
         final var groupExtractor = permissionLoader.load();
-        final var connectionListener = new ConnectionListener(groupDatas, groupExtractor, new TabManager(),
-                new ScoreboardManager());
+        final var connectionListener = new ConnectionListener(groupDatas, groupExtractor, tabManager,
+                scoreboardManager);
         Bukkit.getPluginManager().registerEvents(connectionListener, this);
+    }
+
+    @Override
+    public void onDisable() {
+        scoreboardManager.executeChanges(tabManager.clear());
     }
 
 }

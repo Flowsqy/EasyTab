@@ -127,4 +127,19 @@ public class TabManager {
         }
     }
 
+    @NotNull
+    public List<TeamUpdate> clear() {
+        lock.lock();
+        try {
+            final var teamUpdates = new LinkedList<TeamUpdate>();
+            for (var update : list.clear()) {
+                final var previousName = nameTranslator.translate(update.previousPosition());
+                teamUpdates.add(new TeamUpdate(previousName, null, update.value()));
+            }
+            return teamUpdates;
+        } finally {
+            lock.unlock();
+        }
+    }
+
 }
